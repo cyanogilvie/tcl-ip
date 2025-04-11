@@ -3,7 +3,7 @@ if {"bench" ni [info commands bench]} {
 	namespace import bench::*
 }
 
-interp alias {} ip {} ::fast_ip::ip
+namespace import ::fast_ip::ip
 
 proc readfile fn {
 	set h	[open $fn r]

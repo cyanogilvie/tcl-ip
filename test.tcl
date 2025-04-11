@@ -2,7 +2,7 @@ package require tcltest
 tcltest::configure {*}$argv
 
 source ip.tcl
-interp alias {} ip {} ::fast_ip::ip
+namespace import ::fast_ip::ip
 
 proc readfile fn {
 	set h	[open $fn r]
