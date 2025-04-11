@@ -646,7 +646,7 @@ OBJCMD(ip) //<<<
 				// and GetNetworksFromObj will shimmer an ip_objtype to networks_objtype, invalidating
 				// the ip_objtype intrep pointer we would be holding if we'd fetched that one first.
 				TEST_OK_LABEL(finally, code, GetNetworksFromObj(interp, objv[A_NETWORKS], &count, &networks));
-				//TEST_OK_LABEL(finally, code, GetIPFromObj(interp, objv[A_IP], &ip));
+				TEST_OK_LABEL(finally, code, GetIPFromObj(interp, objv[A_IP], &ip));	// Not directly required, but rather do it here where proper errors can be thrown, rather than Tcl_Panicing in _compare_ip
 
 				// Perform binary search
 				Tcl_Obj* result = bsearch(&objv[A_IP], networks, count, sizeof(Tcl_Obj*), compare_ip);
@@ -666,6 +666,9 @@ OBJCMD(ip) //<<<
 
 				enum {A_cmd=1, A_NETWORK_SETS, A_IP, A_objc};
 				CHECK_ARGS_LABEL(finally, code, "network_sets ip");
+
+				TEST_OK_LABEL(finally, code, GetIPFromObj(interp, objv[A_IP], &ip));	// Not directly required, but rather do it here where proper errors can be thrown, rather than Tcl_Panicing in _compare_ip
+				ip = NULL;	// Could be invalidated by later GetNetworksFromObj
 
 				replace_tclobj(&res, Tcl_NewListObj(0, NULL));
 				TEST_OK_LABEL(finally, code, Tcl_DictObjFirst(interp, objv[A_NETWORK_SETS], &search, &k, &v, &done));

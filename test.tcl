@@ -2,6 +2,7 @@ package require tcltest
 tcltest::configure {*}$argv
 
 source ip.tcl
+interp alias {} ip {} ::fast_ip::ip
 
 proc readfile fn {
 	set h	[open $fn r]
@@ -115,6 +116,9 @@ namespace eval ::ip::test {
 	test contained-mixed-networks-2			"Test mixed IPv4/IPv6 networks"	{ip contained {192.168.1.0/24 2001:db8::/64} 2001:db8::10}	1
 	test contained-ipv4-mapped-ipv6			"Test IPv4-mapped IPv6 address"	{ip contained 192.168.1.0/24 ::ffff:192.168.1.10}			1
 	test contained-ipv4-mapped-ipv6-network "Test IPv4-mapped IPv6 network containing IPv4"	{ip contained ::ffff:192.168.1.0/120 192.168.1.10}	1
+	test contained-bad-ipv4-mapped			"Test invalid format" -body {
+		ip contained 10.0.0.0/8 ::ffff::10.0.1.1
+	} -returnCodes error -result {Can't parse IP "::ffff::10.0.1.1"}
 
 	# Edge cases
 	test contained-empty-networks			"Test with empty networks list"					{ip contained {} 192.168.1.1}			0
@@ -158,6 +162,9 @@ namespace eval ::ip::test {
 	}
 	test lookup-1.1 "Test lookup, found"		{ip lookup $network_sets 66.249.68.131}	{google googlebot}
 	test lookup-2.1 "Test lookup, not found"	{ip lookup $network_sets 1.1.1.2}		{}
+	test lookup-bad-ipv4-mapped			"Test invalid format" -body {
+		ip lookup {bad 10.0.0.0/8} ::ffff::10.0.1.1
+	} -returnCodes error -result {Can't parse IP "::ffff::10.0.1.1"}
 
 	# Clean up and report results
 	cleanupTests

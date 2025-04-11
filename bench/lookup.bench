@@ -3,6 +3,8 @@ if {"bench" ni [info commands bench]} {
 	namespace import bench::*
 }
 
+interp alias {} ip {} ::fast_ip::ip
+
 proc readfile fn {
 	set h	[open $fn r]
 	try {read $h} finally {close $h}
@@ -20,7 +22,7 @@ proc main {} {
 		trafficforce	[readfile trafficforce.networks] \
 	]
 
-	bench lookup-1.1 {Test IP against Google's ranges, IPv4, found} -batch auto -compare {
+	bench lookup-1.1 {Test IP against many network sets} -batch auto -compare {
 		ip_lookup		{ip lookup $network_sets 66.249.68.131}
 		ip_contained	{lmap {name networks} $network_sets {if {![ip contained $networks 66.249.68.131]} continue; set name}}
 	} -result {google googlebot}

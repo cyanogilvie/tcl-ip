@@ -9,6 +9,6 @@ proc writefile {fn data} {
 }
 
 writefile [lindex $argv 1] [string map [list \
-	@PACKAGE_NAME@		ip \
+	@PACKAGE_NAME@		fast_ip \
 	@PACKAGE_VERSION@	[string trim [readfile version]] \
 ] [readfile [lindex $argv 0]]]

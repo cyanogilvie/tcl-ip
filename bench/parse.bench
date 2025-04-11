@@ -3,6 +3,8 @@ if {"bench" ni [info commands bench]} {
 	namespace import bench::*
 }
 
+interp alias {} ip {} ::fast_ip::ip
+
 set here	[file dirname [file normalize [info script]]]
 
 #source [file join $here radb.tcl]

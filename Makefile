@@ -9,12 +9,12 @@ VALGRINDARGS = --tool=memcheck --num-callers=8 --leak-resolution=high \
 
 PACKAGE_LOAD = "source ip.tcl"
 PACKAGE_LOAD_EMBED = source\ ip.tcl
-VER = 1.0
+VER = 1.1
 
-tm: tm/ip-$(VER).tm
+tm: tm/fast_ip-$(VER).tm
 
-tm/ip-$(VER).tm: ip.c tools/make_tm.tcl
-	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/ip-$(VER).tm
+tm/fast_ip-$(VER).tm: ip.c tools/make_tm.tcl
+	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/fast_ip-$(VER).tm
 
 test:
 	$(TCLSH_ENV) $(PKG_ENV) $(TCLSH) test.tcl $(TESTFLAGS)
@@ -47,7 +47,7 @@ install: install-tm install-doc
 
 install-tm: tm doc
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl
-	cp tm/ip-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
+	cp tm/fast_ip-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
 
 install-doc: doc
 	@mkdir -p $(DESTDIR)$(PREFIX)/share/man/mann

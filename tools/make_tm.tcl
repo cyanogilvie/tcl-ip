@@ -11,11 +11,12 @@ proc writebin {fn bytes} {
 set dir	[file dirname [file normalize [lindex $argv 0]]]
 file mkdir $dir
 set tm	{package require jitc
+namespace eval ::fast_ip {namespace export *}
 apply {{} {
 	set h		[open [info script] rb]
 	set data	[try {read $h} finally {close $h}]
 	regsub {^.*?\x1A\n} $data {} c_source_cmp
-	jitc::bind ::ip [list options {-Wall -Werror -std=c17 -g} filter {jitc::re2c --case-ranges --tags --no-debug-info} code [encoding convertfrom utf-8 [zlib inflate $c_source_cmp]]] ip
+	jitc::bind ::fast_ip::ip [list options {-Wall -Werror -std=c17 -g} filter {jitc::re2c --case-ranges --tags --no-debug-info} code [encoding convertfrom utf-8 [zlib inflate $c_source_cmp]]] ip
 }}
 }
 set c_source_cmp	[zlib deflate [encoding convertto utf-8 [readfile ip.c]] 9]
