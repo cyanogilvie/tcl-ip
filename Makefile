@@ -9,7 +9,7 @@ VALGRINDARGS = --tool=memcheck --num-callers=8 --leak-resolution=high \
 
 PACKAGE_LOAD = "source ip.tcl"
 PACKAGE_LOAD_EMBED = source\ ip.tcl
-VER = 1.1
+VER = 1.2
 
 tm: tm/fast_ip-$(VER).tm
 
@@ -45,7 +45,7 @@ clean:
 
 install: install-tm install-doc
 
-install-tm: tm doc
+install-tm: tm
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl
 	cp tm/fast_ip-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
 
