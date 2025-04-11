@@ -1,5 +1,5 @@
 package require chantricks
-package require jitc
+package require jitc 0.5.6
 
 set debug	{}
 if 1 {

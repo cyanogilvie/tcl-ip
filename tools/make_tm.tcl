@@ -10,7 +10,7 @@ proc writebin {fn bytes} {
 
 set dir	[file dirname [file normalize [lindex $argv 0]]]
 file mkdir $dir
-set tm	{package require jitc
+set tm	{package require jitc 0.5.6
 namespace eval ::fast_ip {namespace export *}
 apply {{} {
 	set h		[open [info script] rb]
