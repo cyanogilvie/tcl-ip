@@ -1,0 +1,7 @@
+*.swp
+core
+doc/ip.n
+doc/.build
+last
+ref
+tm

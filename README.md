@@ -1,0 +1,171 @@
+# IP
+
+Tcl extension for IP address validation and network membership testing
+
+## SYNOPSIS
+
+**package require ip** ?1.0?
+
+**ip type** *address*  
+**ip normalize** *address*  
+**ip valid** *address*  
+**ip eq** *address1* *address2*  
+**ip contained** *networks* *address*  
+**ip lookup** *network\_sets* *address*
+
+## DESCRIPTION
+
+This package provides facilities for Tcl scripts to parse, validate, and
+test membership of IP addresses (both IPv4 and IPv6) in networks and
+network sets.
+
+It implements an accelerated facility using custom internal
+representations to achieve O(log2(n)) performance for network membership
+testing, a significant improvement over traditional O(n) linear search
+methods.
+
+## COMMANDS
+
+  - **ip type** *address*  
+    Return the type of *address* as either “ipv4” or “ipv6”. The
+    *address* can be in any valid IP format, with optional netbits
+    suffix (e.g., “192.168.1.0/24”, “2001:db8::/64”). If *address* is
+    not a valid IP address, an error is raised.
+
+  - **ip normalize** *address*  
+    Returns the normalized form of *address*. IPv6 addresses are
+    compressed according to standard rules (longest run of zeros is
+    replaced with “::”). IPv4-mapped IPv6 addresses (e.g.,
+    “::ffff:192.168.1.1”) are converted to IPv4 format. This function
+    validates the IP address as a side effect.
+
+  - **ip valid** *address*  
+    Returns true if *address* is a valid IP address (IPv4 or IPv6),
+    false otherwise. This function does not throw errors on invalid
+    input.
+
+  - **ip eq** *address1* *address2*  
+    Compare two IP addresses for equality, returns true if they are the
+    same address (possibly formatted differently) and have the same
+    netbits, false otherwise.
+
+  - **ip contained** *networks* *address*  
+    Test if *address* is contained within any of the networks specified
+    in *networks*. The *networks* parameter should be a Tcl list of IP
+    addresses with optional netbits suffixes. Returns true if *address*
+    is contained in any of the networks, false otherwise. This command
+    uses a binary search algorithm for efficient lookup.
+
+  - **ip lookup** *network\_sets* *address*  
+    Search multiple sets of networks for an address. The *network\_sets*
+    parameter should be a Tcl dictionary mapping set names to lists of
+    networks. Returns a list of the names of all sets that contain the
+    given *address*.
+
+## EXAMPLES
+
+Check if an IP address is valid:
+
+``` tcl
+if {[ip valid 192.168.1.1]} {
+    puts "Valid IP address"
+} else {
+    puts "Invalid IP address"
+}
+```
+
+Check the type of an IP address:
+
+``` tcl
+set type [ip type 2001:db8::1]
+puts "Address type: $type"
+# Output: Address type: ipv6
+```
+
+Test if an IP is within a specific network:
+
+``` tcl
+set in_network [ip contained 192.168.1.0/24 192.168.1.100]
+puts "In network: $in_network"
+# Output: In network: 1
+```
+
+Test an IP against multiple networks:
+
+``` tcl
+set networks {
+    192.168.0.0/16
+    10.0.0.0/8
+    2001:db8::/64
+}
+set in_any [ip contained $networks 10.1.2.3]
+puts "In any network: $in_any"
+# Output: In any network: 1
+```
+
+Lookup an IP address in named network sets:
+
+``` tcl
+# Load network sets from files
+proc readfile fn {
+    set h [open $fn r]
+    try {read $h} finally {close $h}
+}
+
+set network_sets [dict create \
+    google    [readfile google.networks] \
+    facebook  [readfile facebook.networks] \
+    internal  {10.0.0.0/8 172.16.0.0/12 192.168.0.0/16} \
+]
+
+puts "IP found in sets: [ip lookup $network_sets 66.249.68.131]"
+# Example output: IP found in sets: google
+```
+
+## PERFORMANCE
+
+The package uses custom Tcl\_ObjType implementations to efficiently
+represent IP addresses and network lists internally. Network membership
+testing is implemented using a binary search algorithm with O(log2(n))
+complexity, providing significant performance benefits over linear
+search methods for large network lists.
+
+Performance can be further enhanced by preloading network lists:
+
+``` tcl
+# Preloading creates the optimized internal representation
+set networks {192.168.0.0/16 10.0.0.0/8 172.16.0.0/12}
+ip contained $networks ::
+
+# Subsequent lookups will be faster
+for {set i 0} {$i < 1000} {incr i} {
+    ip contained $networks $some_ip
+}
+```
+
+## DEPENDENCIES
+
+  - jitc: <https://github.com/cyanogilvie/jitc>
+
+## SOURCE CODE
+
+The project source code is available at
+<https://github.com/cyanogilvie/tcl-ip>. Please create issues there for
+any bugs discovered.
+
+## LICENSE
+
+This package is placed in the public domain: the author disclaims
+copyright and liability to the extent allowed by law. For those
+jurisdictions that limit an author’s ability to disclaim copyright this
+package can be used under the terms of the CC0, BSD, or MIT licenses. No
+attribution, permission or fees are required to use this for whatever
+you like, commercial or otherwise, though I would urge its users to do
+good and not evil to the world.
+
+## SEE ALSO
+
+For additional documentation on IP address formats and network
+calculation, see [RFC 4291](https://tools.ietf.org/html/rfc4291) (IPv6
+addressing) and [RFC 4632](https://tools.ietf.org/html/rfc4632) (CIDR
+notation).

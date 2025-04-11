@@ -1,0 +1,36 @@
+if {"bench" ni [info commands bench]} {
+	package require bench
+	namespace import bench::*
+}
+
+proc readfile fn {
+	set h	[open $fn r]
+	try {read $h} finally {close $h}
+}
+
+proc main {} {
+	variable networks
+	#namespace eval :: {source [file join [file dirname [file normalize [info script]]] radb.tcl]}
+	#set networks	[radb routes -asn AS15169 -types both]
+	set networks	[readfile google.networks]
+
+	bench contained-1.1 {Test IP against Google's ranges, IPv4, found} -batch auto -compare {
+		ip_contained	{ip contained $networks 66.249.68.131}
+	} -result 1
+
+	bench contained-1.2 {Test IP against Google's ranges, IPv4, not found} -batch auto -compare {
+		ip_contained	{ip contained $networks 20.171.207.240}
+	} -result 0
+
+	bench contained-2.1 {Test IP against Google's ranges, IPv6, found} -batch auto -compare {
+		ip_contained	{ip contained $networks 2001:4860:4864::8888}
+	} -result 1
+
+	bench contained-2.2 {Test IP against Google's ranges, IPv6, not found} -batch auto -compare {
+		ip_contained	{ip contained $networks 2001:4860:4860::8888}
+	} -result 0
+}
+
+main
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4
