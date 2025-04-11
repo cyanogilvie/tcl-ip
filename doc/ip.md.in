@@ -10,7 +10,7 @@ Tcl extension for IP address validation and network membership testing
 **package require fast_ip** ?@PACKAGE_VERSION@?
 
 \# Optional: import the ip command\
-interp alias {} ip {} ::fast_ip::ip
+namespace import ::fast_ip::ip
 
 **ip type** *address*\
 **ip normalize** *address*\
