@@ -4,7 +4,7 @@ Tcl extension for IP address validation and network membership testing
 
 ## SYNOPSIS
 
-**package require fast\_ip** ?1.0?
+**package require fast\_ip** ?1.3?
 
 \# Optional: import the ip command  
 namespace import ::fast\_ip::ip
@@ -25,7 +25,8 @@ network sets.
 It implements an accelerated facility using custom internal
 representations to achieve O(log2(n)) performance for network membership
 testing, a significant improvement over traditional O(n) linear search
-methods.
+methods: on typical modern hardware **ip lookup** can test against
+hundreds of thousands of networks in single-digit microseconds.
 
 ## COMMANDS
 
@@ -133,7 +134,10 @@ testing is implemented using a binary search algorithm with O(log2(n))
 complexity, providing significant performance benefits over linear
 search methods for large network lists.
 
-Performance can be further enhanced by preloading network lists:
+If the latency of every lookup is critical (rather than the average),
+the parsing of the network ranges can be front-loaded before the
+latency-critical lookups by performing a dummy lookup against the
+networks which parses and caches the sorted network list:
 
 ``` tcl
 # Preloading creates the optimized internal representation

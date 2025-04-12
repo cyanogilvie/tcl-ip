@@ -9,14 +9,15 @@ VALGRINDARGS = --tool=memcheck --num-callers=8 --leak-resolution=high \
 
 PACKAGE_LOAD = "source ip.tcl"
 PACKAGE_LOAD_EMBED = source\ ip.tcl
-VER = 1.3
+PACKAGE_NAME = fast_ip
+VER = $(file < version)
 
 all: tm doc
 
-tm: tm/fast_ip-$(VER).tm
+tm: tm/$(PACKAGE_NAME)-$(VER).tm
 
-tm/fast_ip-$(VER).tm: ip.c tools/make_tm.tcl tip445.h
-	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/fast_ip-$(VER).tm
+tm/$(PACKAGE_NAME)-$(VER).tm: ip.c tools/make_tm.tcl tip445.h
+	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/$(PACKAGE_NAME)-$(VER).tm
 
 test:
 	$(TCLSH_ENV) $(PKG_ENV) $(TCLSH) test.tcl $(TESTFLAGS)
@@ -38,9 +39,9 @@ doc/ip.n: doc/.build/ip.md
 README.md: doc/.build/ip.md
 	pandoc --standalone --from markdown --to gfm doc/.build/ip.md --output README.md
 
-doc/.build/ip.md: doc/ip.md.in
+doc/.build/ip.md: doc/ip.md.in version Makefile
 	@mkdir -p doc/.build
-	@$(TCLSH) tools/predoc.tcl doc/ip.md.in doc/.build/ip.md
+	@$(TCLSH) tools/predoc.tcl doc/ip.md.in doc/.build/ip.md @PACKAGE_NAME@ "$(PACKAGE_NAME)" @PACKAGE_VERSION@ "$(VER)"
 
 clean:
 	-rm -rf doc/.build tm doc/ip.n
@@ -49,7 +50,7 @@ install: install-tm install-doc
 
 install-tm: tm
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl
-	cp tm/fast_ip-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
+	cp tm/$(PACKAGE_NAME)-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
 
 install-doc: doc
 	@mkdir -p $(DESTDIR)$(PREFIX)/share/man/mann
