@@ -3,8 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build/Test Commands
-- Build: N/A
-- Run: `tclsh8.7 ip_in_range.tcl`
+- Build: `make`
 - Test: `make test`
 - Memory check: `make valgrind`
 - Tests matching a pattern: `make test TESTFLAGS="-match glob"`, where glob is a glob pattern matching the test name
@@ -18,13 +17,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Error handling: Use `THROW_*` macros for error propagation
 - Memory management: Free allocated resources in cleanup sections
 - Naming: snake_case for functions and variables
-- Hash tables used for object representation tracking
-- TCL integration follows standard TCL C API patterns
+- Hash table indexed doubly-linked list used for object representation tracking
+- Tcl integration follows standard Tcl C API patterns
 - IP address parsing supports both IPv4 and IPv6 formats
 - No trailing whitespace on lines.  Empty lines should be 0-length
 
 ## Project Architecture
 - The code implements an accelerated facility for Tcl scripts to test whether a given IP is within a network or list of networks
-- Custom Tcl_ObjType planned to hold lists of non-overlapping networks in sorted order
+- Custom Tcl_ObjType used to hold lists of non-overlapping networks in sorted order
 - Network membership testing uses O(log2(n)) binary search instead of O(n) linear search
-- Need to build a test suite using tcltest to cover cases for parsing IPv4 and IPv6 addresses in different formats, with and without netbits suffixes

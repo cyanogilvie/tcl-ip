@@ -9,11 +9,13 @@ VALGRINDARGS = --tool=memcheck --num-callers=8 --leak-resolution=high \
 
 PACKAGE_LOAD = "source ip.tcl"
 PACKAGE_LOAD_EMBED = source\ ip.tcl
-VER = 1.2
+VER = 1.3
+
+all: tm doc
 
 tm: tm/fast_ip-$(VER).tm
 
-tm/fast_ip-$(VER).tm: ip.c tools/make_tm.tcl
+tm/fast_ip-$(VER).tm: ip.c tools/make_tm.tcl tip445.h
 	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/fast_ip-$(VER).tm
 
 test:

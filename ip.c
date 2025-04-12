@@ -567,7 +567,9 @@ OBJCMD(ip) //<<<
 	enum {A_cmd, A_OP, A_args};
 	CHECK_MIN_ARGS_LABEL(finally, code, "op ?arg ...?");
 
-	TEST_OK_LABEL(finally, code, Tcl_GetIndexFromObj(interp, objv[A_OP], ops, "op", TCL_EXACT, &op));
+	int	opidx;
+	TEST_OK_LABEL(finally, code, Tcl_GetIndexFromObj(interp, objv[A_OP], ops, "op", TCL_EXACT, &opidx));
+	op = opidx;
 	switch (op) {
 		case OP_TYPE: //<<<
 			{
