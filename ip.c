@@ -520,8 +520,8 @@ INIT { //<<<
 RELEASE { //<<<
 	for (int i=0; i<L_size; i++) replace_tclobj(&lit[i], NULL);
 
-	const char* hashstats = Tcl_HashStats(&g_intreps);
-	ckfree(hashstats);
+	//const char* hashstats = Tcl_HashStats(&g_intreps);
+	//ckfree(hashstats);
 
 	// Since new entries are added to the tail of the list, we can just walk
 	// the list and free all the entries - any new entries added during this
