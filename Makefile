@@ -1,11 +1,18 @@
 DESTDIR =
 PREFIX = /usr/local
-TCLSH = tclsh8.7
-TCLSH_BENCH = cftcl
+TCLSH = tclsh
+TCLSH_BENCH = tclsh
 VALGRINDEXTRA =
 VALGRINDARGS = --tool=memcheck --num-callers=8 --leak-resolution=high \
 			   --leak-check=yes -v --suppressions=suppressions --keep-debuginfo=yes \
 			   --error-exitcode=2 $(VALGRINDEXTRA)
+
+SCAN_BUILD = scan-build-22
+CLANG = clang-22
+RE2C = re2c
+TCL_INCLUDE = /opt/tcl9g/include
+SCANDIR = .scan-build
+SCANFLAGS =
 
 PACKAGE_LOAD = "source ip.tcl"
 PACKAGE_LOAD_EMBED = source\ ip.tcl
@@ -16,7 +23,7 @@ all: tm doc
 
 tm: tm/$(PACKAGE_NAME)-$(VER).tm
 
-tm/$(PACKAGE_NAME)-$(VER).tm: ip.c tools/make_tm.tcl tip445.h
+tm/$(PACKAGE_NAME)-$(VER).tm: ip.c tools/make_tm.tcl
 	$(TCLSH_ENV) $(TCLSH) tools/make_tm.tcl tm/$(PACKAGE_NAME)-$(VER).tm
 
 test:
@@ -31,6 +38,14 @@ vim-gdb:
 benchmark:
 	$(TCLSH_ENV) $(PKG_ENV) $(TCLSH_BENCH) bench/run.tcl $(BENCHFLAGS) -load $(PACKAGE_LOAD)
 
+scan-build:
+	@mkdir -p $(SCANDIR)
+	$(RE2C) --case-ranges --tags --no-debug-info -o $(SCANDIR)/ip.c ip.c
+	$(SCAN_BUILD) --use-cc=$(CLANG) -o $(SCANDIR)/reports $(SCANFLAGS) \
+		$(CLANG) -c -std=c17 -Wall \
+			-I$(TCL_INCLUDE) -I. -Iteabase \
+			$(SCANDIR)/ip.c -o $(SCANDIR)/ip.o
+
 doc: doc/ip.n README.md
 
 doc/ip.n: doc/.build/ip.md
@@ -44,7 +59,7 @@ doc/.build/ip.md: doc/ip.md.in version Makefile
 	@$(TCLSH) tools/predoc.tcl doc/ip.md.in doc/.build/ip.md @PACKAGE_NAME@ "$(PACKAGE_NAME)" @PACKAGE_VERSION@ "$(VER)"
 
 clean:
-	-rm -rf doc/.build tm doc/ip.n
+	-rm -rf doc/.build tm doc/ip.n $(SCANDIR)
 
 install: install-tm install-doc
 
@@ -56,4 +71,4 @@ install-doc: doc
 	@mkdir -p $(DESTDIR)$(PREFIX)/share/man/mann
 	cp -f doc/ip.n $(DESTDIR)$(PREFIX)/share/man/mann/
 
-.PHONY: test valgrind vim-gdb benchmark doc tm clean install install-tm install-doc
+.PHONY: test valgrind vim-gdb benchmark scan-build doc tm clean install install-tm install-doc

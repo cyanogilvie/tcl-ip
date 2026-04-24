@@ -1,20 +1,26 @@
+---
+author:
+- Cyan Ogilvie
+title: fast_ip(3) 1.4 \| IP address validation and lookup
+---
+
 # IP
 
 Tcl extension for IP address validation and network membership testing
 
 ## SYNOPSIS
 
-**package require fast\_ip** ?1.3?
+**package require fast_ip** ?1.4?
 
 \# Optional: import the ip command  
-namespace import ::fast\_ip::ip
+namespace import ::fast_ip::ip
 
 **ip type** *address*  
 **ip normalize** *address*  
 **ip valid** *address*  
 **ip eq** *address1* *address2*  
 **ip contained** *networks* *address*  
-**ip lookup** *network\_sets* *address*
+**ip lookup** *network_sets* *address*
 
 ## DESCRIPTION
 
@@ -30,41 +36,40 @@ hundreds of thousands of networks in single-digit microseconds.
 
 ## COMMANDS
 
-  - **ip type** *address*  
-    Return the type of *address* as either “ipv4” or “ipv6”. The
-    *address* can be in any valid IP format, with optional netbits
-    suffix (e.g., “192.168.1.0/24”, “2001:db8::/64”). If *address* is
-    not a valid IP address, an error is raised.
+**ip type** *address*  
+Return the type of *address* as either “ipv4” or “ipv6”. The *address*
+can be in any valid IP format, with optional netbits suffix (e.g.,
+“192.168.1.0/24”, “2001:db8::/64”). If *address* is not a valid IP
+address, an error is raised.
 
-  - **ip normalize** *address*  
-    Returns the normalized form of *address*. IPv6 addresses are
-    compressed according to standard rules (longest run of zeros is
-    replaced with “::”). IPv4-mapped IPv6 addresses (e.g.,
-    “::ffff:192.168.1.1”) are converted to IPv4 format. This function
-    validates the IP address as a side effect.
+**ip normalize** *address*  
+Returns the normalized form of *address*. IPv6 addresses are compressed
+according to standard rules (longest run of zeros is replaced with
+“::”). IPv4-mapped IPv6 addresses (e.g., “::ffff:192.168.1.1”) are
+converted to IPv4 format. This function validates the IP address as a
+side effect.
 
-  - **ip valid** *address*  
-    Returns true if *address* is a valid IP address (IPv4 or IPv6),
-    false otherwise. This function does not throw errors on invalid
-    input.
+**ip valid** *address*  
+Returns true if *address* is a valid IP address (IPv4 or IPv6), false
+otherwise. This function does not throw errors on invalid input.
 
-  - **ip eq** *address1* *address2*  
-    Compare two IP addresses for equality, returns true if they are the
-    same address (possibly formatted differently) and have the same
-    netbits, false otherwise.
+**ip eq** *address1* *address2*  
+Compare two IP addresses for equality, returns true if they are the same
+address (possibly formatted differently) and have the same netbits,
+false otherwise.
 
-  - **ip contained** *networks* *address*  
-    Test if *address* is contained within any of the networks specified
-    in *networks*. The *networks* parameter should be a Tcl list of IP
-    addresses with optional netbits suffixes. Returns true if *address*
-    is contained in any of the networks, false otherwise. This command
-    uses a binary search algorithm for efficient lookup.
+**ip contained** *networks* *address*  
+Test if *address* is contained within any of the networks specified in
+*networks*. The *networks* parameter should be a Tcl list of IP
+addresses with optional netbits suffixes. Returns true if *address* is
+contained in any of the networks, false otherwise. This command uses a
+binary search algorithm for efficient lookup.
 
-  - **ip lookup** *network\_sets* *address*  
-    Search multiple sets of networks for an address. The *network\_sets*
-    parameter should be a Tcl dictionary mapping set names to lists of
-    networks. Returns a list of the names of all sets that contain the
-    given *address*.
+**ip lookup** *network_sets* *address*  
+Search multiple sets of networks for an address. The *network_sets*
+parameter should be a Tcl dictionary mapping set names to lists of
+networks. Returns a list of the names of all sets that contain the given
+*address*.
 
 ## EXAMPLES
 
@@ -128,7 +133,7 @@ puts "IP found in sets: [ip lookup $network_sets 66.249.68.131]"
 
 ## PERFORMANCE
 
-The package uses custom Tcl\_ObjType implementations to efficiently
+The package uses custom Tcl_ObjType implementations to efficiently
 represent IP addresses and network lists internally. Network membership
 testing is implemented using a binary search algorithm with O(log2(n))
 complexity, providing significant performance benefits over linear
@@ -152,7 +157,7 @@ for {set i 0} {$i < 1000} {incr i} {
 
 ## DEPENDENCIES
 
-  - jitc: <https://github.com/cyanogilvie/jitc>
+- jitc: <https://github.com/cyanogilvie/jitc>
 
 ## SOURCE CODE
 

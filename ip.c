@@ -180,8 +180,8 @@ static int GetIPFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct ip_info** ipPtr
 	if (!ir) {
 		Tcl_ObjInternalRep*	net_ir = Tcl_FetchInternalRep(obj, &networks_objtype);
 		if (net_ir) {
-			unsigned long	count		= net_ir->ptrAndLongRep.value;
-			Tcl_Obj**		networks	= net_ir->ptrAndLongRep.ptr;
+			Tcl_Size	count		= net_ir->ptrAndSize.size;
+			Tcl_Obj**	networks	= net_ir->ptrAndSize.ptr;
 			if (count == 1) {
 				// We have a networks object with a single element, so we can
 				// just use that element as the IP object
@@ -239,7 +239,7 @@ static int GetIPFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct ip_info** ipPtr
 		size_t	addr_len = ae - (const unsigned char*)Tcl_GetString(obj);
 
 		if (addr_len >= sizeof(ip_part))
-			THROW_PRINTF_LABEL(finally, code, "IP address too long");
+			THROW_ERROR_LABEL(finally, code, "IP address too long");
 
 		memcpy(ip_part, Tcl_GetString(obj), addr_len);
 		ip_part[addr_len] = '\0';
@@ -317,11 +317,11 @@ struct Tcl_ObjType networks_objtype = {
 static void free_networks_internal_rep(Tcl_Obj* obj) //<<<
 {
 	Tcl_ObjInternalRep*	ir = Tcl_FetchInternalRep(obj, &networks_objtype);
-	Tcl_Obj**			networks	= ir->ptrAndLongRep.ptr;
-	size_t				count		= ir->ptrAndLongRep.value;
+	Tcl_Obj**			networks	= ir->ptrAndSize.ptr;
+	Tcl_Size			count		= ir->ptrAndSize.size;
 
 #if 1
-	for (size_t i=0; i<count; i++) {
+	for (Tcl_Size i=0; i<count; i++) {
 		//if (i > 10) break;
 		replace_tclobj(&networks[i], NULL);
 	}
@@ -338,19 +338,19 @@ static void free_networks_internal_rep(Tcl_Obj* obj) //<<<
 static void dup_networks_internal_rep(Tcl_Obj* src, Tcl_Obj* dst) //<<<
 {
 	Tcl_ObjInternalRep*	ir = Tcl_FetchInternalRep(src, &networks_objtype);
-	size_t				count		= ir->ptrAndLongRep.value;
-	Tcl_Obj**			networks	= ir->ptrAndLongRep.ptr;
+	Tcl_Size			count		= ir->ptrAndSize.size;
+	Tcl_Obj**			networks	= ir->ptrAndSize.ptr;
 
 	// Create a copy of the networks array
 	Tcl_Obj** new_networks = ckalloc(count * sizeof(Tcl_Obj*));
 	memset(new_networks, 0, count * sizeof(Tcl_Obj*));
-	for (size_t i=0; i<count; i++)
+	for (Tcl_Size i=0; i<count; i++)
 		replace_tclobj(&new_networks[i], networks[i]);
 
 	// Store the new internal rep in the destination object
 	Tcl_StoreInternalRep(dst, &networks_objtype, &(Tcl_ObjInternalRep){
-			.ptrAndLongRep.ptr		= new_networks,
-			.ptrAndLongRep.value	= count
+			.ptrAndSize.ptr		= new_networks,
+			.ptrAndSize.size	= count
 	});
 	register_intrep(dst); // Register the new object in the intrep table
 }
@@ -359,14 +359,14 @@ static void dup_networks_internal_rep(Tcl_Obj* src, Tcl_Obj* dst) //<<<
 static void update_networks_string_rep(Tcl_Obj* obj) //<<<
 {
 	Tcl_ObjInternalRep*	ir = Tcl_FetchInternalRep(obj, &networks_objtype);
-	Tcl_Obj**			networks	= ir->ptrAndLongRep.ptr;
-	size_t				count		= ir->ptrAndLongRep.value;
+	Tcl_Obj**			networks	= ir->ptrAndSize.ptr;
+	Tcl_Size			count		= ir->ptrAndSize.size;
 	Tcl_DString			ds;
 
 	Tcl_DStringInit(&ds);
 
 	// Create a string representation of the networks: A Tcl list of IP objects
-	for (size_t i=0; i<count; i++)
+	for (Tcl_Size i=0; i<count; i++)
 		Tcl_DStringAppendElement(&ds, Tcl_GetString(networks[i]));
 
 	Tcl_InitStringRep(obj, Tcl_DStringValue(&ds), Tcl_DStringLength(&ds));
@@ -437,12 +437,12 @@ static int compare_ip(const void* a, const void* b) //<<<
 }
 
 //>>>
-static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, size_t* count, Tcl_Obj*** networksPtr) //<<<
+static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, Tcl_Size* count, Tcl_Obj*** networksPtr) //<<<
 {
 	int					code = TCL_OK;
 	Tcl_Obj**			networks = NULL;
 	Tcl_ObjInternalRep*	ir = NULL;
-	int					oc = 0;
+	Tcl_Size			oc = 0;
 
 	ir = Tcl_FetchInternalRep(obj, &networks_objtype);
 
@@ -455,8 +455,8 @@ static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, size_t* count, T
 			replace_tclobj(&networks[0], Tcl_DuplicateObj(obj));
 			oc = 1;
 			Tcl_StoreInternalRep(obj, &networks_objtype, &(Tcl_ObjInternalRep){
-					.ptrAndLongRep.ptr		= networks,
-					.ptrAndLongRep.value	= oc
+					.ptrAndSize.ptr		= networks,
+					.ptrAndSize.size	= oc
 			});
 			register_intrep(obj);
 			ir = Tcl_FetchInternalRep(obj, &networks_objtype);
@@ -473,7 +473,7 @@ static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, size_t* count, T
 			networks = ckalloc(oc * sizeof(Tcl_Obj*));
 			memset(networks, 0, oc * sizeof(Tcl_Obj*));
 
-			for (int i=0; i<oc; i++) {
+			for (Tcl_Size i=0; i<oc; i++) {
 				struct ip_info*	ip = NULL;
 				TEST_OK_LABEL(finally, code, GetIPFromObj(interp, ov[i], &ip));	// Ensure all the list elements are valid IPs
 				replace_tclobj(&networks[i], ov[i]);
@@ -484,8 +484,8 @@ static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, size_t* count, T
 				qsort(networks, oc, sizeof(Tcl_Obj*), compare_ip);
 		}
 		Tcl_StoreInternalRep(obj, &networks_objtype, &(Tcl_ObjInternalRep){
-				.ptrAndLongRep.ptr		= networks,
-				.ptrAndLongRep.value	= oc
+				.ptrAndSize.ptr		= networks,
+				.ptrAndSize.size	= oc
 		});
 
 		networks = NULL;	// transfer ownership to the obj intrep
@@ -493,12 +493,12 @@ static int GetNetworksFromObj(Tcl_Interp* interp, Tcl_Obj* obj, size_t* count, T
 		ir = Tcl_FetchInternalRep(obj, &networks_objtype);
 	}
 
-	*networksPtr	= ir->ptrAndLongRep.ptr;
-	*count			= ir->ptrAndLongRep.value;
+	*networksPtr	= ir->ptrAndSize.ptr;
+	*count			= ir->ptrAndSize.size;
 
 finally:
 	if (networks) {
-		for (int i=0; i<oc; i++) replace_tclobj(&networks[i], NULL);
+		for (Tcl_Size i=0; i<oc; i++) replace_tclobj(&networks[i], NULL);
 		ckfree(networks);
 		networks = NULL;
 	}
@@ -628,7 +628,7 @@ OBJCMD(ip) //<<<
 						ip1->af			== ip2->af &&
 						ip1->netbits	== ip2->netbits &&
 						(
-							(ip1->af == AF_INET  && ip1->ipv4.s_addr == ip2->ipv4.s_addr == 0) ||
+							(ip1->af == AF_INET  && ip1->ipv4.s_addr == ip2->ipv4.s_addr) ||
 							(ip1->af == AF_INET6 && memcmp(&ip1->ipv6.s6_addr, &ip2->ipv6.s6_addr, sizeof(ip1->ipv6.s6_addr)) == 0)
 						)
 						? L_TRUE : L_FALSE
@@ -641,7 +641,7 @@ OBJCMD(ip) //<<<
 				enum {A_cmd=1, A_NETWORKS, A_IP, A_objc};
 				CHECK_ARGS_LABEL(finally, code, "networks ip");
 				Tcl_Obj**			networks = NULL;
-				size_t				count = 0;
+				Tcl_Size			count = 0;
 				struct ip_info*		ip = NULL;
 
 				// Must get the networks intrep first, since A_NETWORKS and A_IP may alias each other
@@ -660,7 +660,7 @@ OBJCMD(ip) //<<<
 			case OP_LOOKUP: //<<<
 			{
 				Tcl_Obj**			networks = NULL;
-				size_t				count = 0;
+				Tcl_Size			count = 0;
 				struct ip_info*		ip = NULL;
 				Tcl_DictSearch		search;
 				Tcl_Obj				*k, *v;
