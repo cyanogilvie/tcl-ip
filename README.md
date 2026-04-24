@@ -1,7 +1,7 @@
 ---
 author:
 - Cyan Ogilvie
-title: fast_ip(3) 1.4 \| IP address validation and lookup
+title: fast_ip(3) 1.5 \| IP address validation and lookup
 ---
 
 # IP
@@ -10,7 +10,7 @@ Tcl extension for IP address validation and network membership testing
 
 ## SYNOPSIS
 
-**package require fast_ip** ?1.4?
+**package require fast_ip** ?1.5?
 
 \# Optional: import the ip command  
 namespace import ::fast_ip::ip

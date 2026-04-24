@@ -64,7 +64,7 @@ clean:
 install: install-tm install-doc
 
 install-tm: tm
-	@mkdir -p $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl
+	@mkdir -p $(DESTDIR)$(PREFIX)/lib/tcl9/site-tcl
 	cp tm/$(PACKAGE_NAME)-$(VER).tm $(DESTDIR)$(PREFIX)/lib/tcl8/site-tcl/
 
 install-doc: doc
